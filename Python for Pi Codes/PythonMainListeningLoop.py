@@ -6,24 +6,26 @@ import serial
 import thread
 import threading
 
+# create a serial connection to arduino
+ser = serial.Serial('/dev/ttyACM0', 9600)
+
+# create UDP socket
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+hostIp = "192.168.1.227"
+port = 6969
+serverAddress = (hostIp, port)
+sock.bind(serverAddress)
+
+print "Socket setup: %s | %s" % serverAddress
+print "Listening..."
+
+# set global variables that will hold the values from serial connection
+mostRecentX = 0.0;
+mostRecentY = 0.0;
+
 def MAIN():
 	try:
-		# create a serial connection to arduino
-		ser = serial.Serial('/dev/ttyACM0', 9600)
 
-		# create UDP socket
-		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		hostIp = "192.168.0.69"
-		port = 6969
-		serverAddress = (hostIp, port)
-		sock.bind(serverAddress)
-
-		print "Socket setup: %s | %s" % serverAddress
-		print "Listening..."
-
-		# set global variables that will hold the values from serial connection
-		mostRecentX = 0.0;
-		mostRecentY = 0.0;
 		
 		# main listening loop
 		while True:
@@ -35,28 +37,33 @@ def MAIN():
 				decodedStr = data.decode("utf-8")
 				
 				print "Message Received: %s" % decodedStr
+
+				if 's' in decodedStr:
+					output = update_settings(decodedStr)
+					print output
+
 				
-				# use string to find the function to callable
-				if decodedStr == "Start X Pattern":
-					print "Calling XPattern..."
-					sock.sendto("Starting X Pattern", address)
+				# # use string to find the function to callable
+				# if decodedStr == "Start X Pattern":
+				# 	print "Calling XPattern..."
+				# 	sock.sendto("Starting X Pattern", address)
 					
-					# start X Pattern
-					try:
-						thread.start_new_thread( StartPattern, ('1', ser, ) )
-					except: 
-						print "Error Starting Thread..."
+				# 	# start X Pattern
+				# 	try:
+				# 		thread.start_new_thread( StartPattern, ('1', ser, ) )
+				# 	except: 
+				# 		print "Error Starting Thread..."
 						
-				elif decodedStr == "Get Values":
-					msg = FormatXYValuesMessage(mostRecentX, mostRecentY)
-					sent = sock.sendto(msg, address)
+				# elif decodedStr == "Get Values":
+				# 	msg = FormatXYValuesMessage(mostRecentX, mostRecentY)
+				# 	sent = sock.sendto(msg, address)
 				
-				else: 
-					msg = "Incorrect Command.  Try Again..."
-					sent = sock.sendto(msg, address)
+				# else: 
+				# 	msg = "Incorrect Command.  Try Again..."
+				# 	sent = sock.sendto(msg, address)
 					
-				# when command has been executed, update console...
-				print "Waiting for Command..."
+				# # when command has been executed, update console...
+				# print "Waiting for Command..."
 				
 	except KeyboardInterrupt:
 		print "\nClosing serial connection..."
@@ -66,6 +73,12 @@ def MAIN():
 		print "\n"
 		sys.exit()
 # end MAIN()
+
+def update_settings(string):
+	# s|100:200:300:400:500:600
+	ser.write(string)
+	outputStr = ser.readline()
+	return outputStr
 
 def StartPattern(pattern, ser):
 	global mostRecentX

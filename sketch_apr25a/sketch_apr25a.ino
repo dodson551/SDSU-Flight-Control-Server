@@ -1,3 +1,6 @@
+#include <string.h>
+#include <String.h>
+
 const int ledPin = 13;
 String read_string, max_X, min_X, max_Y, min_Y, max_Fwd, max_Rev;
 int maxFwd = 0;
@@ -60,8 +63,46 @@ void loop() {
     
   }
   read_string = "";
-  /// im gay
   
+}
+
+void SplitString(String str, char splitter)
+{
+  int numOfSplitters = 0;
+  String *stringArray;
+  
+  BuildArrayOfStrings(stringArray, str, splitter);
+  
+}
+
+int BuildArrayOfStrings(String *strToBuild, String str, char splitter)
+{
+  char *charRa;
+  str.toCharArray(charRa, str.length());
+  int numOfSubstrings = GetNumberOfSubstrings(charRa, splitter);
+  
+  String splitArray[numOfSubstrings];
+
+  //*strToBuild = splitArray;
+  return 0;
+}
+
+int GetNumberOfSubstrings(char *ra, char splitter)
+{
+  int numOfSplitters = 0;
+  int i = 0;
+  // counts number of splitters in the string
+  while (ra[i] != '\0')
+  {
+    // counts the number of chars
+    if (ra[i] == splitter)
+    {
+      numOfSplitters++;
+    }
+    i++;
+  }
+
+  return numOfSplitters + 1;
 }
 
 

@@ -7,7 +7,7 @@ import thread
 import threading
 
 # global variable to check if GUI requests exit from program
-exitReq = False
+exitReq = 0
 
 # buffer size global variable 
 BUF = 4096
@@ -33,9 +33,8 @@ exitport = 7979
 exitserverAddress = (hostIp, exitport)
 exitsock.bind(exitserverAddress)
 
-print "Socket setup: %s | %s" % serverAddress
-print 
-print "Listening..."
+print "Socket: %s | %s" % serverAddress
+print "Exit Socket: %s | %s" % exitserverAddress
 
 # set global variables that will hold the values from serial connection
 mostRecentX = 0.0;
@@ -45,33 +44,38 @@ def MAIN():
 
 	try:
 
-		exit_trd = threading.Thread(target=exit_thread())
-		exit_trd.start()
-		print "Exit thread started."
+		print "Main loop started."
+
+		try:
+			thread.start_new_thread(exit_thread, ())
+		except:
+			print "Error starting exit thread..."
 
 		# main listening loop
 		while True:
-			if exitReq is True:
+			if exitReq == 1:
 				print "Exiting listening loop."
 				print "\nClosing serial connection..."
 				ser.close()
 				print "Closing socket..."
 				sock.close()
+				exitsock.close()
 				print "\n"
 				sys.exit()
 			else:
 				data, address = sock.recvfrom(BUF)
-				
+
 				# when a UDP packet arrives...
 				if data:
 					# convert received bytes to string
-					decodedStr = data.decode("utf-8")
+					#decodedStr = data.decode("utf-8")
 					
-					print "Message Received: %s" % decodedStr
+					print "Message Received: %s" % data
 
-					if 's' in decodedStr:
-						output = update_settings(decodedStr)
+					if 's' in data:
+						output = update_settings(data)
 						print output
+
 
 					
 					# # use string to find the function to callable
@@ -101,6 +105,7 @@ def MAIN():
 		ser.close()
 		print "Closing socket..."
 		sock.close()
+		exitsock.close()
 		print "\n"
 		sys.exit()
 # end MAIN()
@@ -112,14 +117,14 @@ def update_settings(string):
 	return outputStr
 
 def exit_thread():
+	global exitReq
+	print "Exit thread started."
 	while True:
-		data, address = exitsock.recvfrom(BUF)
-		if data:
-			if 'exit' in data:
-				print data
-				exitReq = True
-			else:
-				exitReq = False
+		exitdata, exitaddress = exitsock.recvfrom(BUF)
+		if exitdata:
+			if 'exit' in exitdata:
+				print exitdata
+				exitReq = 1
 		return
 
 def StartPattern(pattern, ser):

@@ -44,6 +44,7 @@ def MAIN():
 	
 	exit_trd = threading.Thread(target=exit_thread())
 	exit_trd.start()
+	print "Exit thread started."
 
 	try:
 
@@ -114,6 +115,7 @@ def exit_thread():
 		data, address = exitsock.recvfrom(BUF)
 		if data:
 			if 'exit' in data:
+				print data
 				exitReq = True
 			else:
 				exitReq = False

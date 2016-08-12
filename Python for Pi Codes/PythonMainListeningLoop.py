@@ -34,6 +34,7 @@ exitserverAddress = (hostIp, exitport)
 exitsock.bind(exitserverAddress)
 
 print "Socket setup: %s | %s" % serverAddress
+print 
 print "Listening..."
 
 # set global variables that will hold the values from serial connection
@@ -41,12 +42,12 @@ mostRecentX = 0.0;
 mostRecentY = 0.0;
 
 def MAIN():
-	
-	exit_trd = threading.Thread(target=exit_thread())
-	exit_trd.start()
-	print "Exit thread started."
 
 	try:
+
+		exit_trd = threading.Thread(target=exit_thread())
+		exit_trd.start()
+		print "Exit thread started."
 
 		# main listening loop
 		while True:
